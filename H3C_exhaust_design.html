@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H3C Exhaust Build</title>
+<style>
+:root{
+  --bg:#f7f6f2; --card:#ffffff; --ink:#1d1d1b; --muted:#5f5e58; --line:#dedbd2;
+  --accent:#0f6b5c; --accent-soft:#e3f1ee; --warn:#9a5b00; --warn-soft:#fdf1dd;
+  --duct:#9aa3ab; --air:#2b7bd6; --red:#b3261e;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151614; --card:#1e1f1c; --ink:#ecebe6; --muted:#a8a69e; --line:#34352f;
+    --accent:#5cc8b2; --accent-soft:#1d332e; --warn:#f0b357; --warn-soft:#352a17;
+    --duct:#7d868e; --air:#6aa8f0; --red:#f2867d;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151614; --card:#1e1f1c; --ink:#ecebe6; --muted:#a8a69e; --line:#34352f;
+  --accent:#5cc8b2; --accent-soft:#1d332e; --warn:#f0b357; --warn-soft:#352a17;
+  --duct:#7d868e; --air:#6aa8f0; --red:#f2867d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:920px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:1.9rem;margin:0 0 .3rem;letter-spacing:-.01em}
+h2{font-size:1.3rem;margin:2.4rem 0 .8rem;padding-top:.6rem;border-top:1px solid var(--line)}
+h3{font-size:1.05rem;margin:1.4rem 0 .4rem}
+p,li{color:var(--ink)}
+.sub{color:var(--muted);margin:0 0 1.2rem}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:1rem 0 0}
+nav a{font-size:.88rem;color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 11px;background:var(--card)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+.note{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:8px;padding:12px 14px;margin:14px 0}
+.good{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;margin:14px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.tag{display:inline-block;font-size:.75rem;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-right:4px}
+.tag.opt{background:var(--warn-soft);color:var(--warn)}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:600px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td.num{text-align:right;white-space:nowrap}
+tfoot td{font-weight:700}
+ol.steps{counter-reset:s;list-style:none;padding:0}
+ol.steps>li{counter-increment:s;position:relative;padding:0 0 14px 44px}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--bg);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+ol.steps>li b{display:block}
+label.chk{display:flex;gap:8px;align-items:flex-start;padding:4px 0}
+label.chk input{margin-top:5px}
+svg{width:100%;height:auto;display:block}
+code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.muted{color:var(--muted);font-size:.9rem}
+@media print{nav{display:none}.card,.note,.good{break-inside:avoid}}
+</style>
+</head>
+<body>
+<main>
+
+<h1>H3C Exhaust System</h1>
+<p class="sub">Vent the printer's chamber exhaust outdoors through 4″ (≈100 mm) aluminum duct and out through the low rectangular garage vent, using the MakerWorld <a href="https://makerworld.com/en/models/3580314-h3c-to-e1-air-purifier-hose-adapter-90-degree">H3C → E1 hose adapter (90°)</a> as the printer-side connector. Passive design (no booster fan or filter) for a ~5 ft, 2-bend run, with an animal- and insect-proof outlet, materials, steps and a shopping list.</p>
+
+<nav>
+  <a href="#overview">Layout</a><a href="#verify">Duct size</a><a href="#fan">Fan &amp; filter</a>
+  <a href="#critters">Critter-proofing</a><a href="#materials">Materials</a><a href="#steps">Steps</a><a href="#shop">Shopping list</a><a href="#test">Test &amp; upkeep</a>
+</nav>
+
+<!-- ============ OVERVIEW ============ -->
+<h2 id="overview">1. System layout</h2>
+<div class="card">
+<svg viewBox="0 0 860 300" role="img" aria-label="Diagram: printer, 90 degree adapter, aluminum duct, backdraft damper, adapter plate with 4 inch collar over the low rectangular garage vent with its metal mesh cover">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="var(--air)"/></marker>
+  </defs>
+  <!-- printer -->
+  <rect x="20" y="70" width="170" height="170" rx="10" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+  <text x="105" y="160" text-anchor="middle" fill="var(--ink)" font-size="17" font-weight="700">H3C</text>
+  <text x="105" y="182" text-anchor="middle" fill="var(--muted)" font-size="12">built-in exhaust fan</text>
+  <!-- adapter -->
+  <path d="M190,110 h42" fill="none" stroke="var(--accent)" stroke-width="22"/>
+  <text x="200" y="168" text-anchor="start" fill="var(--accent)" font-size="12" font-weight="600">① 90° adapter (turns sideways)</text>
+  <text x="200" y="183" text-anchor="start" fill="var(--muted)" font-size="11">PETG/ASA print</text>
+  <!-- duct up and over -->
+  <path d="M232,110 h358 q30,0 30,30" fill="none" stroke="var(--duct)" stroke-width="20" stroke-dasharray="4 3"/>
+  <!-- clamps -->
+  <rect x="232" y="98" width="6" height="24" fill="var(--ink)"/>
+  <text x="222" y="86" fill="var(--muted)" font-size="11">② clamp</text>
+  <text x="250" y="140" fill="var(--ink)" font-size="12" font-weight="600">③ 4″ semi-rigid aluminum duct (≤ 5 ft, 2 bends)</text>
+  <!-- duct down to low vent -->
+  <path d="M620,138 v50 q0,30 30,30 h68" fill="none" stroke="var(--duct)" stroke-width="20"/>
+  <!-- damper on horizontal leg after bend 2 -->
+  <rect x="664" y="205" width="26" height="26" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+  <line x1="677" y1="208" x2="677" y2="228" stroke="var(--ink)" stroke-width="2.5"/>
+  <circle cx="677" cy="208" r="2" fill="var(--ink)"/>
+  <text x="677" y="196" text-anchor="middle" fill="var(--ink)" font-size="12" font-weight="600">④ damper</text>
+  <!-- wall with opening near ground -->
+  <rect x="730" y="20" width="24" height="182" fill="var(--line)"/>
+  <rect x="730" y="234" width="24" height="12" fill="var(--line)"/>
+  <text x="746" y="110" text-anchor="middle" fill="var(--muted)" font-size="11" transform="rotate(-90 746 110)">garage wall</text>
+  <!-- adapter plate with collar -->
+  <rect x="718" y="194" width="12" height="48" fill="var(--accent)" opacity=".85"/>
+  <text x="724" y="276" text-anchor="end" fill="var(--accent)" font-size="11" font-weight="600">plate + 4″ collar + insect mesh</text>
+  <!-- existing mesh cover -->
+  <line x1="756" y1="200" x2="756" y2="236" stroke="var(--red)" stroke-width="3" stroke-dasharray="3 2"/>
+  <!-- ground -->
+  <line x1="600" y1="246" x2="860" y2="246" stroke="var(--muted)" stroke-width="2"/>
+  <text x="850" y="262" text-anchor="end" fill="var(--muted)" font-size="10">ground</text>
+  <text x="600" y="160" text-anchor="end" fill="var(--ink)" font-size="12" font-weight="600">⑤ low garage vent (near ground)</text>
+  <text x="600" y="175" text-anchor="end" fill="var(--red)" font-size="11">existing metal mesh outside</text>
+  <!-- bend markers -->
+  <circle cx="611" cy="119" r="4" fill="var(--warn)"/>
+  <text x="602" y="96" text-anchor="end" fill="var(--warn)" font-size="11" font-weight="700">bend 1 ↓</text>
+  <circle cx="629" cy="209" r="4" fill="var(--warn)"/>
+  <text x="612" y="238" text-anchor="end" fill="var(--warn)" font-size="11" font-weight="700">bend 2 → out</text>
+  <!-- airflow arrows -->
+  <path d="M300,82 h120" stroke="var(--air)" stroke-width="2.5" marker-end="url(#arr)"/>
+  <path d="M440,82 h100" stroke="var(--air)" stroke-width="2.5" marker-end="url(#arr)"/>
+  <path d="M762,218 h40" stroke="var(--air)" stroke-width="2.5" marker-end="url(#arr)"/>
+  <text x="20" y="290" fill="var(--muted)" font-size="11">Air path: chamber → adapter → duct (runs down) → bend 2 → damper (horizontal) → collar plate → low garage vent. Passive: the H3C's own fan drives the flow.</text>
+</svg>
+</div>
+
+<div class="grid">
+  <div class="card"><b>Design targets</b>
+    <ul class="muted" style="margin:.4rem 0 0;padding-left:18px">
+      <li>4″ / 100 mm duct the whole way, no reducers</li>
+      <li>≤ 5 ft (1.5 m) total run, 2 bends after the adapter</li>
+      <li>No booster fan, no filter — printer fan only</li>
+      <li>Every joint clamped <i>and</i> foil-taped (no leaks into the room)</li>
+      <li>Outlet: existing low garage vent + insect mesh + backdraft damper</li>
+    </ul>
+  </div>
+  <div class="card"><b>Why semi-rigid, not foil accordion</b>
+    <p class="muted" style="margin:.4rem 0 0">Thin foil “accordion” duct sags, tears and has roughly twice the airflow resistance. Semi-rigid aluminum holds its shape, bends by hand, and is still cheap. Pull it fully stretched — slack folds choke airflow.</p>
+  </div>
+</div>
+
+<!-- ============ VERIFY ============ -->
+<h2 id="verify">2. Duct size: confirmed 4″</h2>
+<div class="good">
+<b>The adapter's outlet is made for the Bambu E1's 4″ hose</b>, so standard 4″ (≈102 mm) aluminum duct slides straight over it and a clamp seals it. No reducer is needed, and every part on the list is the common 4″ size.
+<ul style="margin:.5rem 0 0;padding-left:20px">
+  <li>Push the duct at least 1¼″ (3 cm) over the outlet before clamping.</li>
+  <li>Tighten the clamp only until it's snug, since too much force can crack the printed outlet. Then foil-tape the joint.</li>
+  <li>Leave about 6″ (15 cm) of clearance beside the printer for the adapter's sideways turn and the duct.</li>
+</ul>
+</div>
+
+<!-- ============ FAN / FILTER ============ -->
+<h2 id="fan">3. Fan &amp; filter: not needed</h2>
+<div class="good"><b>Decision: passive vent, no booster fan, no filter.</b> A 5 ft, 2-bend run of 4″ semi-rigid duct is well within what the H3C's built-in exhaust fan can push, and venting outdoors dilutes the fumes, so there's nothing to filter.</div>
+<ul>
+  <li>Keep it that way by stretching the duct fully (no slack folds), using smooth wide bends instead of sharp kinks, and choosing a <b>light gravity-flap damper</b> rather than a stiff spring one.</li>
+  <li>If the test in section 9 shows weak airflow, first remove a kink or swap the damper. Add an inline fan only as a last resort.</li>
+</ul>
+
+<!-- ============ CRITTERS ============ -->
+<h2 id="critters">5. Keeping animals and insects out</h2>
+<p>Your vent is a rectangular opening near the ground with a metal mesh cover. Being at ground level, it's the easiest way in for mice, insects, slugs and spiders, so use three layers:</p>
+<div class="grid">
+  <div class="card"><span class="tag">Layer 1</span><b>Existing metal mesh cover</b>
+    <p class="muted">Already there; it stops mice and larger animals if it's intact. From outside, check for rust holes, bent corners or gaps at the frame, and replace it or patch it with stainless hardware cloth if needed. Mice fit through gaps of about 6 mm (1/4″).</p></div>
+  <div class="card"><span class="tag">Layer 2</span><b>Fine stainless insect mesh</b>
+    <p class="muted">The existing cover is usually too coarse to stop insects. Add <b>18×16 stainless insect mesh</b> over the whole opening on the inside, clamped between the vent and your adapter plate. Printer exhaust has no lint, so it won't clog. Use stainless, not fiberglass (chewable) or plain steel (rusts).</p></div>
+  <div class="card"><span class="tag">Layer 3</span><b>Inline backdraft damper</b>
+    <p class="muted">A light gravity-flap damper on the short <b>horizontal</b> section after bend 2, right at the plate. A gravity flap only seals when it's horizontal (on a vertical run it just hangs open). Stops cold drafts, smells and crawling insects coming up the duct when the printer is off.</p></div>
+</div>
+<p class="muted">Seal the adapter plate to the wall all the way round (foam gasket + silicone). Any gap lets insects past the mesh and lets exhaust leak back into the garage. Outside, keep soil, mulch, leaves, snow and plants at least 6″ (15 cm) below and clear of the vent.</p>
+<p class="muted">There's no gas water heater or furnace in the garage, so nothing needs this vent for combustion air and a full plate can cover it. Just make sure the exhaust doesn't come out right next to the garage door, a window or a spot where people stand.</p>
+
+<!-- ============ MATERIALS ============ -->
+<h2 id="materials">6. Materials</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>Item</th><th>Spec</th><th>Qty</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>H3C → E1 90° hose adapter (printed)</td><td>PETG or ASA, 4 walls, 20–25 % infill, no TPU/PLA (chamber heat softens PLA)</td><td>1</td></tr>
+<tr><td>2</td><td>Semi-rigid aluminum duct</td><td>4″ (102 mm) × 8 ft (standard length; cut to ~5 ft, keep the rest as spare)</td><td>1</td></tr>
+<tr><td>3</td><td>Worm-gear hose clamps</td><td>Stainless, fits 3–5″ (or 4″ duct clamp)</td><td>4</td></tr>
+<tr><td>4</td><td>Aluminum foil tape</td><td>UL 181 rated, 2″ wide (not cloth “duct tape”)</td><td>1 roll</td></tr>
+<tr><td>5</td><td>Backdraft damper</td><td>4″ inline, light gravity flap, no spring (low resistance); mounted horizontally after bend 2</td><td>1</td></tr>
+<tr><td>6</td><td>Vent adapter plate</td><td>1/2″ exterior plywood, 1/4″ polycarbonate, or a 3D-printed PETG/ASA plate, cut ~1″ larger than the vent's inside opening on every side</td><td>1</td></tr>
+<tr><td>7</td><td>4″ starting collar</td><td>Sheet-metal duct start collar with crimp tabs (or print a collar into the plate)</td><td>1</td></tr>
+<tr><td>8</td><td>Stainless insect mesh</td><td>18×16, sheet large enough to cover the vent (+ 1/4″ hardware cloth only if the existing cover is damaged)</td><td>1</td></tr>
+<tr><td>9</td><td>Silicone sealant</td><td>Clear, outdoor rated (plate-to-wall and collar seals)</td><td>1 tube</td></tr>
+<tr><td>10</td><td>Foam gasket / weatherstrip</td><td>Closed-cell, to seal the plate against the wall</td><td>1 roll</td></tr>
+<tr><td>11</td><td>Duct hangers / strap</td><td>Perforated strap or 3D-printed clips to support the run</td><td>2–3</td></tr>
+<tr><td>12</td><td>Screws / anchors</td><td>Stainless screws; masonry screws (e.g. Tapcon) if the vent is in concrete or block</td><td>~8</td></tr>
+</tbody></table></div>
+
+<h3>Tools</h3>
+<p class="muted">Calipers or tape measure · flathead / 7 mm nut driver (clamps) · tin snips or utility knife (duct, mesh) · gloves (cut duct edges are sharp) · caulk gun · drill/driver (masonry bit if concrete) · jigsaw or 4¼″ hole saw for the plate.</p>
+
+<!-- ============ STEPS ============ -->
+<h2 id="steps">7. Build steps</h2>
+<ol class="steps">
+<li><b>Measure and plan the route.</b> Measure the vent's inside opening and map the shortest route down to it with the fewest bends. Your run is ~5 ft with 2 bends; cut the duct ~6 in longer than measured so you have slack to make the joints.</li>
+<li><b>Print the adapter.</b> PETG or ASA, 4 walls, supports as the model specifies. Test-fit on the H3C exhaust port; it should seat without forcing. Add a thin foam gasket if there's a visible gap.</li>
+<li><b>Inspect the vent from outside.</b> Check the metal mesh cover for rust, holes or gaps; patch with stainless hardware cloth if needed. Clear soil, leaves and plants away from it.</li>
+<li><b>Make the adapter plate.</b> Cut the plate ~1″ larger than the vent's inside opening on every side. Cut a 4″ hole in the centre, push the starting collar through, bend its tabs flat, then screw and silicone it.</li>
+<li><b>Add the insect mesh.</b> From inside, clean out the vent opening and lay the stainless insect mesh over the whole opening so it's clamped between the wall and the plate.</li>
+<li><b>Mount the plate.</b> Stick foam gasket round the plate's back edge, press it over the mesh and opening, and screw it to the wall (masonry screws for concrete/block). Run a bead of silicone round the edge.</li>
+<li><b>Install the backdraft damper</b> on the plate's 4″ collar, so it sits on the horizontal leg after bend 2. Airflow arrow toward the vent, flap hinge at the <b>top</b> so it falls shut by itself. Clamp + tape, and check the flap swings freely.</li>
+<li><b>Cut and fit the duct.</b> Wearing gloves, cut the semi-rigid duct to length. Slide it ≥ 3 cm over the adapter outlet and over the damper spigot.</li>
+<li><b>Clamp and seal every joint.</b> Tighten clamps snug (don't crush the printed adapter), then wrap each joint with foil tape for an airtight seal.</li>
+<li><b>Support the run.</b> Use hangers so no weight pulls on the printer adapter, and let the duct run downhill to the low vent so any condensation drains outside, with no dips that could hold water.</li>
+<li><b>Attach to the printer</b> and confirm the printer can still be moved enough to open doors and service it.</li>
+</ol>
+
+<!-- ============ SHOPPING ============ -->
+<h2 id="shop">8. Shopping list</h2>
+<p class="muted">Approximate US prices. Other links open a store search for the right item, so you can compare brands and check stock. Tick items as you buy them. <span class="tag">Must have</span> = needed for the build; <span class="tag opt">Optional</span> = only if the note applies or you want it.</p>
+<div class="good"><b>Save with kits:</b> one duct kit plus a damper and a spare clamp cover four rows of the list below.</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Kit</th><th>What's in it</th><th>Replaces</th><th>Buy</th><th class="num">≈ Price</th></tr></thead>
+<tbody>
+<tr><td><b>4″ semi-rigid dryer vent hose kit, 8 ft</b><br><span class="muted">e.g. Hon&amp;Guan, HOOMESUN (also sold as 5 ft: get 8 ft so you have slack)</span></td><td>4″ semi-rigid aluminum duct + 2 stainless clamps + foil tape</td><td>Duct, clamps, foil tape</td><td><a href="https://www.amazon.com/s?k=4+inch+semi+rigid+dryer+vent+hose+8+ft+clamps+foil+tape" target="_blank" rel="noopener">Amazon</a> · <a href="https://honguan.com/product/honguan-4-inch-semi-rigid-dryer-vent-hose-5-feet-flexible-aluminum-duct-with-2-clamps-and-aluminum-foil-tape/" target="_blank" rel="noopener">Hon&amp;Guan</a></td><td class="num">$15–25</td></tr>
+<tr><td><b>4″ gravity-flap backdraft damper</b><br><span class="muted">e.g. Deflecto Dryer Vent Draft Blocker (no spring)</span></td><td>Inline damper with gravity flap</td><td>Damper</td><td><a href="https://www.amazon.com/clp/B00009W3HB" target="_blank" rel="noopener">Deflecto</a> · <a href="https://www.amazon.com/Blocker-Backdraft-Extractor-Draught-Shutter/dp/B084BP47PT" target="_blank" rel="noopener">Repa (alt.)</a></td><td class="num">$10–15</td></tr>
+<tr><td><b>1 extra 4″ stainless clamp</b><br><span class="muted">usually sold in 2-packs</span></td><td>Worm-gear clamp, fits 4″ duct</td><td>Third clamp</td><td><a href="https://www.amazon.com/s?k=4+inch+duct+clamp+stainless+2+pack" target="_blank" rel="noopener">Amazon</a></td><td class="num">$5–8</td></tr>
+</tbody>
+<tfoot><tr><td colspan="4">Kit-route subtotal (vs ≈ $34–55 bought separately)</td><td class="num">≈ $30–48</td></tr></tfoot>
+</table></div>
+<p class="muted">You need <b>3 clamps</b> in total (adapter → duct, duct → damper, damper → collar). The duct kit gives 2, plus the 1 extra. The damper is a <b>gravity flap with no spring</b>: install it on the horizontal leg after bend 2 with the flap hinge at the top, and confirm in the listing there's no spring before buying. Still buy separately: starting collar, plate, screws, insect mesh, silicone, foam gasket. Duct kits are sold under many brand names, so check the listing says <b>4″, semi-rigid (not foil accordion), 8 ft</b> and lists what's in the box.</p>
+
+<h3>Full list (buying items individually)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>✓</th><th>Item</th><th>Need</th><th>Buy</th><th class="num">Qty</th><th class="num">≈ Price</th></tr></thead>
+<tbody>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>Semi-rigid aluminum duct</td><td><span class="tag">Must have</span></td><td><a href="https://www.amazon.com/s?k=4+inch+semi+rigid+aluminum+duct+8+ft" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/4%20inch%20semi%20rigid%20aluminum%20duct%208%20ft" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1</td><td class="num">$12–18</td></tr>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>Stainless worm clamps</td><td><span class="tag">Must have</span></td><td><a href="https://www.amazon.com/s?k=4+inch+duct+clamp+stainless" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/4%20inch%20duct%20clamp%20stainless" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1 pk</td><td class="num">$6–10</td></tr>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>Foil tape</td><td><span class="tag">Must have</span></td><td><a href="https://www.amazon.com/s?k=UL+181+aluminum+foil+tape" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/UL%20181%20aluminum%20foil%20tape" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1</td><td class="num">$8–12</td></tr>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>Backdraft damper</td><td><span class="tag">Must have</span></td><td><a href="https://www.amazon.com/s?k=4+inch+backdraft+damper" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/4%20inch%20backdraft%20damper" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1</td><td class="num">$8–15</td></tr>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>4″ starting collar</td><td><span class="tag">Must have</span></td><td><a href="https://www.amazon.com/s?k=4+inch+start+collar+duct" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/4%20inch%20start%20collar%20duct" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1</td><td class="num">$4–8</td></tr>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>Plate material</td><td><span class="tag">Must have</span></td><td><a href="https://www.amazon.com/s?k=polycarbonate+sheet+1%2F4+inch" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/polycarbonate%20sheet%201%2F4%20inch" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1</td><td class="num">$10–20</td></tr>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>Screws / masonry anchors</td><td><span class="tag">Must have</span></td><td><a href="https://www.amazon.com/s?k=stainless+steel+screws+%238" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/stainless%20steel%20screws%20%238" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1 pk</td><td class="num">$6–12</td></tr>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>Stainless insect mesh</td><td><span class="tag">Must have</span></td><td><a href="https://www.amazon.com/s?k=stainless+steel+insect+screen+mesh" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/stainless%20steel%20insect%20screen%20mesh" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1</td><td class="num">$8–12</td></tr>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>Silicone sealant</td><td><span class="tag">Must have</span></td><td><a href="https://www.amazon.com/s?k=outdoor+silicone+sealant+clear" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/outdoor%20silicone%20sealant%20clear" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1</td><td class="num">$6–9</td></tr>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>Closed-cell foam gasket</td><td><span class="tag">Must have</span></td><td><a href="https://www.amazon.com/s?k=closed+cell+foam+weather+stripping" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/closed%20cell%20foam%20weather%20stripping" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1</td><td class="num">$6–10</td></tr>
+</tbody>
+<tfoot><tr><td></td><td colspan="4">Must-have total</td><td class="num">≈ $75–125</td></tr></tfoot>
+<tbody>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>Stainless hardware cloth (only if cover is damaged)</td><td><span class="tag opt">Optional</span></td><td><a href="https://www.amazon.com/s?k=stainless+steel+hardware+cloth+1%2F4+inch" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/stainless%20steel%20hardware%20cloth%201%2F4%20inch" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1</td><td class="num">$10–15</td></tr>
+<tr><td><input type="checkbox" aria-label="bought"></td><td>4¼″ hole saw: cuts the 4″ hole in the <i>plate</i>, not the wall (skip if you have a jigsaw)</td><td><span class="tag opt">Optional</span></td><td><a href="https://www.amazon.com/s?k=4-1%2F4+inch+hole+saw" target="_blank" rel="noopener">Amazon</a> · <a href="https://www.homedepot.com/s/4-1%2F4%20inch%20hole%20saw" target="_blank" rel="noopener">Home Depot</a></td><td class="num">1</td><td class="num">$15–25</td></tr>
+</tbody></table></div>
+
+<!-- ============ TEST ============ -->
+<h2 id="test">9. Test and maintenance</h2>
+<h3>Commissioning test</h3>
+<label class="chk"><input type="checkbox"> Run the printer's exhaust fan at full; hold a tissue outside the garage vent — it should blow away from the mesh.</label>
+<label class="chk"><input type="checkbox"> Hold an incense stick near each joint indoors — smoke should not be pushed out of any seam.</label>
+<label class="chk"><input type="checkbox"> With the printer off, confirm the damper is closed and no draft comes back through the duct.</label>
+<p class="muted">If the flaps barely open or the room still smells: stretch out any slack, smooth the bends, check for a leaking joint or plate seal, or swap to a lighter damper.</p>
+
+<h3>Maintenance</h3>
+<ul>
+  <li><b>Monthly:</b> look at the vent from outside — no nests, webs, leaves or soil against the mesh.</li>
+  <li><b>Every season:</b> brush the mesh clean, re-check clamps and tape.</li>
+  <li><b>Yearly:</b> inspect the printed adapter for cracks or heat warping; reprint if needed.</li>
+</ul>
+
+<p class="muted" style="margin-top:2rem">Sources: Bambu forum thread <a href="https://forum.bambulab.com/t/e1-air-purifier/261997">E1 Air Purifier</a> (E1 hose ≈102 mm over a 100 mm interface); <a href="https://wiki.bambulab.com/en/knowledge-sharing/exhaust-pipe-connector-installation-tutorial">Bambu wiki – exhaust pipe connector tutorial</a>; <a href="https://makerworld.com/en/models/3580314-h3c-to-e1-air-purifier-hose-adapter-90-degree">MakerWorld adapter</a>. Prices are estimates.</p>
+</main>
+</body>
+</html>
