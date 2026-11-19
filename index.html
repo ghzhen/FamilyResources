@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Family Resources</title>
+<meta name="description" content="Index of project pages, plans and guides.">
+<style>
+:root{
+  --bg:#f7f6f2; --card:#ffffff; --ink:#1d1d1b; --muted:#6a6963; --line:#e3e0d7;
+  --accent:#0f6b5c; --accent-soft:#e3f1ee; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151614; --card:#1e1f1c; --ink:#ecebe6; --muted:#a8a69e; --line:#34352f;
+    --accent:#5cc8b2; --accent-soft:#1d332e; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151614; --card:#1e1f1c; --ink:#ecebe6; --muted:#a8a69e; --line:#34352f;
+  --accent:#5cc8b2; --accent-soft:#1d332e; --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:960px;margin:0 auto;padding:48px 16px 72px}
+
+header h1{font-size:2rem;letter-spacing:-.02em;margin:0 0 .25rem}
+header p{color:var(--muted);margin:0}
+
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:28px 0 8px}
+.search{flex:1 1 240px;min-width:0;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;outline:none}
+.search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.85rem;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
+.chip:hover{color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+
+section{margin-top:36px}
+section h2{display:flex;align-items:baseline;gap:8px;font-size:.8rem;font-weight:650;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px}
+section h2 .count{font-weight:500;letter-spacing:0}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.card{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card:focus-visible{outline:3px solid var(--accent-soft);border-color:var(--accent)}
+.card .title{font-weight:620;display:flex;justify-content:space-between;gap:8px}
+.card .title::after{content:"→";color:var(--accent);transition:transform .15s}
+.card:hover .title::after{transform:translateX(3px)}
+.card .desc{color:var(--muted);font-size:.92rem}
+.card .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.tag{font-size:.72rem;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.date{font-size:.75rem;color:var(--muted)}
+
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+footer{margin-top:56px;color:var(--muted);font-size:.8rem;text-align:center}
+@media (prefers-reduced-motion: reduce){.card,.card .title::after{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Family Resources</h1>
+    <p>Project plans, designs and guides.</p>
+  </header>
+
+  <div class="tools">
+    <input class="search" id="q" type="search" placeholder="Search pages…" aria-label="Search pages">
+    <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
+  </div>
+
+  <div id="list"></div>
+  <p class="empty" id="empty" hidden>No pages match.</p>
+
+  <footer>Updated <span id="updated"></span></footer>
+</main>
+
+<script>
+/* ============================================================
+   EDIT HERE: add a page by adding an entry to a category.
+   - file: path relative to this index (case-sensitive on GitHub Pages)
+   - tags and date are optional
+   Add a new category by adding a new { name, pages } block.
+   ============================================================ */
+const CATEGORIES = [
+  {
+    name: "Home Projects",
+    pages: [
+      {
+        title: "H3C Exhaust System",
+        file: "H3C_exhaust_design.html",
+        desc: "Exhaust venting layout, duct sizing, materials, build steps and shopping list.",
+        tags: ["DIY", "Ventilation"],
+        date: "2026-11-19"
+      }
+    ]
+  }
+  // ,{ name: "Travel", pages: [ { title: "...", file: "travel/trip.html", desc: "..." } ] }
+];
+
+const list = document.getElementById("list");
+const chips = document.getElementById("chips");
+const q = document.getElementById("q");
+const empty = document.getElementById("empty");
+let active = "All";
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function renderChips(){
+  const names = ["All", ...CATEGORIES.map(c => c.name)];
+  chips.innerHTML = names.map(n =>
+    `<button class="chip" type="button" aria-pressed="${n === active}" data-cat="${esc(n)}">${esc(n)}</button>`
+  ).join("");
+}
+
+function render(){
+  const term = q.value.trim().toLowerCase();
+  let shown = 0;
+  list.innerHTML = CATEGORIES
+    .filter(c => active === "All" || c.name === active)
+    .map(c => {
+      const pages = c.pages.filter(p =>
+        !term || [p.title, p.desc, c.name, ...(p.tags || [])].join(" ").toLowerCase().includes(term));
+      if (!pages.length) return "";
+      shown += pages.length;
+      return `<section>
+        <h2>${esc(c.name)} <span class="count">${pages.length}</span></h2>
+        <div class="grid">${pages.map(p => `
+          <a class="card" href="${esc(p.file)}">
+            <span class="title">${esc(p.title)}</span>
+            ${p.desc ? `<span class="desc">${esc(p.desc)}</span>` : ""}
+            ${(p.tags?.length || p.date) ? `<span class="meta">
+              ${(p.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
+              ${p.date ? `<span class="date">${esc(p.date)}</span>` : ""}
+            </span>` : ""}
+          </a>`).join("")}
+        </div>
+      </section>`;
+    }).join("");
+  empty.hidden = shown > 0;
+}
+
+chips.addEventListener("click", e => {
+  const b = e.target.closest(".chip");
+  if (!b) return;
+  active = b.dataset.cat;
+  renderChips(); render();
+});
+q.addEventListener("input", render);
+
+document.getElementById("updated").textContent =
+  new Date(document.lastModified).toLocaleDateString(undefined, {year:"numeric", month:"short", day:"numeric"});
+renderChips(); render();
+</script>
+</body>
+</html>
