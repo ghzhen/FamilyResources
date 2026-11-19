@@ -51,6 +51,7 @@ section h2 .count{font-weight:500;letter-spacing:0}
 .tag{font-size:.72rem;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
 .date{font-size:.75rem;color:var(--muted)}
 
+.soon{color:var(--muted);font-size:.9rem;margin:0;padding:16px 18px;border:1px dashed var(--line);border-radius:14px}
 .empty{color:var(--muted);text-align:center;padding:40px 0}
 footer{margin-top:56px;color:var(--muted);font-size:.8rem;text-align:center}
 @media (prefers-reduced-motion: reduce){.card,.card .title::after{transition:none}}
@@ -83,7 +84,7 @@ footer{margin-top:56px;color:var(--muted);font-size:.8rem;text-align:center}
    ============================================================ */
 const CATEGORIES = [
   {
-    name: "Home Projects",
+    name: "3D Printing",
     pages: [
       {
         title: "H3C Exhaust System",
@@ -93,6 +94,10 @@ const CATEGORIES = [
         date: "2026-11-19"
       }
     ]
+  },
+  {
+    name: "Repair List",
+    pages: []
   }
   // ,{ name: "Travel", pages: [ { title: "...", file: "travel/trip.html", desc: "..." } ] }
 ];
@@ -120,7 +125,11 @@ function render(){
     .map(c => {
       const pages = c.pages.filter(p =>
         !term || [p.title, p.desc, c.name, ...(p.tags || [])].join(" ").toLowerCase().includes(term));
-      if (!pages.length) return "";
+      if (!pages.length) {
+        if (term || c.pages.length) return "";
+        shown++;
+        return `<section><h2>${esc(c.name)} <span class="count">0</span></h2><p class="soon">No pages yet.</p></section>`;
+      }
       shown += pages.length;
       return `<section>
         <h2>${esc(c.name)} <span class="count">${pages.length}</span></h2>
